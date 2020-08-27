@@ -36,15 +36,18 @@ void setup () {
 
 void loop() {
   peripheral_loop();
+
+
+  
   if ( T1_LH(1, 1, 1) ) {
     adelante();
-    delay(500);
+    delay(1000);
   } else if (T1_LH(1, 0, 0) | T1_LH(1, 1, 0)  ) {
     derecha();
-    delay(500);
+    delay(1000);
   } else if (T1_LH(0, 0, 1) | T1_LH(0, 1, 1)  ) {
     izquierda();
-    delay(500);
+    delay(1000);
   } else if (T1_LH(0, 0, 0)  ) {
     detener();
   }
