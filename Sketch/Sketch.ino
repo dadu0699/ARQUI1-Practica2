@@ -27,7 +27,7 @@ void peripheral_loop() {
 //---CONFIG_END---
 
 // Configuraciones Propias
-int velocidad = 255;
+int velocidad = 100;
 
 void setup () {
   peripheral_setup();
@@ -36,22 +36,22 @@ void setup () {
 
 void loop() {
   peripheral_loop();
-
-
-  
-  if ( T1_LH(1, 1, 1) ) {
+  if (T1_LH(1, 1, 1) || T1_LH(0, 1, 0)) {
     adelante();
-    delay(1000);
-  } else if (T1_LH(1, 0, 0) | T1_LH(1, 1, 0)  ) {
-    derecha();
-    delay(1000);
-  } else if (T1_LH(0, 0, 1) | T1_LH(0, 1, 1)  ) {
+  } else if (T1_LH(1, 1, 0)) {
     izquierda();
-    delay(1000);
-  } else if (T1_LH(0, 0, 0)  ) {
+  } else if (T1_LH(1, 0, 0)) {
+    izquierda();
+    delay(10);
+  } else if (T1_LH(0, 1, 1)) {
+    derecha();
+  } else if (T1_LH(0, 0, 1)) {
+    derecha();
+    delay(10);
+  } else if (T1_LH(0, 0, 0)) {
     detener();
   }
-
+  delay(25);
 }
 
 void adelante() {
@@ -65,12 +65,12 @@ void atras() {
 }
 
 void derecha() {
-  T1_DRIVE.drive(1, 1, velocidad);
+  T1_DRIVE.drive(1, 1, velocidad * 0.75);
   T1_DRIVE.drive(2, 1, 0);
 }
 
 void izquierda() {
-  T1_DRIVE.drive(2, 1, velocidad);
+  T1_DRIVE.drive(2, 1, velocidad * 0.75);
   T1_DRIVE.drive(1, 1, 0);
 }
 
