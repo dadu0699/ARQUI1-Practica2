@@ -27,43 +27,62 @@ void peripheral_loop() {
 //---CONFIG_END---
 
 // Configuraciones Propias
-int velocidad = 100;
+int velocidad = 255;
 
 void setup () {
   peripheral_setup();
-
-  T1_DRIVE.forwards(velocidad);
 }
 
 
 void loop() {
   peripheral_loop();
+  if ( T1_LH(1, 1, 1) ) {
+    adelante();
+    delay(500);
+  } else if (T1_LH(1, 0, 0) | T1_LH(1, 1, 0)  ) {
+    derecha();
+    delay(500);
+  } else if (T1_LH(0, 0, 1) | T1_LH(0, 1, 1)  ) {
+    izquierda();
+    delay(500);
+  } else if (T1_LH(0, 0, 0)  ) {
+    detener();
+  }
 
+}
+
+void adelante() {
+  //T1_DRIVE.drive(3,1,velocidad);
+  T1_DRIVE.forwards(velocidad);
+}
+
+void atras() {
+  //T1_DRIVE.drive(3,2,velocidad);
+  T1_DRIVE.backwards(velocidad);
+}
+
+void derecha() {
+  T1_DRIVE.drive(1, 1, velocidad);
+  T1_DRIVE.drive(2, 1, 0);
+}
+
+void izquierda() {
+  T1_DRIVE.drive(2, 1, velocidad);
+  T1_DRIVE.drive(1, 1, 0);
+}
+
+void detener() {
   T1_DRIVE.stop();
+}
 
-  if (T1_LH(0, 0, 0)) {
-    T1_DRIVE.forwards(velocidad);
-  } else if (T1_LH(1, 1, 1)) {
-    T1_DRIVE.forwards(velocidad);
-  }
+void giro360() {
+  //T1_DRIVE.turn(velocidad);
+  T1_DRIVE.drive(1, 1, velocidad);
+  T1_DRIVE.drive(2, 2, velocidad);
+}
 
-  // DERECHA
-  if (T1_LH(0, 0, 1)) {
-    T1_DRIVE.drive(1, 1, velocidad);
-  } else if (T1_LH(0, 1, 1)) {
-    T1_DRIVE.drive(1, 1, velocidad);
-  }
-
-  // IZQUIERDA
-  if (T1_LH(1, 0, 0)) {
-    T1_DRIVE.drive(2, 1, velocidad);
-  } else if (T1_LH(1, 1, 0)) {
-    T1_DRIVE.drive(2, 1, velocidad);
-  }
-
-  if (T1_LH(0, 1, 0)) {
-  } else if (T1_LH(1, 0, 1)) {
-  }
+void esquivar() {
+  detener();
 }
 /*
     T1_DRIVE.drive(wheel,dir,speed);
