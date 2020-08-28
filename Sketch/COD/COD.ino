@@ -40,8 +40,8 @@ String matriz[8] {
   "00000000",
   "00000000"
 };
-int posX = 0;
-int posY = 0;
+int posX = 2;
+int posY = 6;
 boolean ziczacVH = true; // Vertical = true, Abajo = false;
 boolean ladoID = true;  // Izquierda = true, Derecha = false;
 boolean ladoAB = true; // Arriba = true, Abajo = false;
@@ -296,8 +296,8 @@ void inicializarMatrizControlador() {
 
 void encender(int posAX, int posAY) {
   if (posAX > 7 || posAY > 7 || posAX < 0 || posAY < 0) {
-    posX = 0;
-    posY = 0;
+    posX = 3;
+    posY = 3;
     posAX = posX;
     posAY = posY;
 
