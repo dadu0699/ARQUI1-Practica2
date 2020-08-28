@@ -1,5 +1,6 @@
-/*-------PINES---------*/
+#include "LedControl.h"
 
+/*-------PINES---------*/
 //SENSORES DE CAMINO
 int PS1P = 13;
 int PS2P = 12;
@@ -21,6 +22,13 @@ int RWB = 2; //Derecha atras
 /*------VARIABLES------*/
 boolean camino = false;
 int giros = 0;
+
+int velocidad = 100;
+int Motor1 = 50; //IZQ
+int Motor2 = 52; //DER
+int Phase1 = 51;
+int Phase2 = 53;
+
 void setup() {
   //Para el sensor Ultrasonico
   pinMode(OS1, INPUT);
@@ -39,6 +47,14 @@ void setup() {
   pinMode(PWML, OUTPUT);
   pinMode(PWMR, OUTPUT);
 
+  //Matriz
+  inicializarMatrizControlador();
+  // VARIABLES DE MOTORES
+  pinMode(Motor1, OUTPUT);
+  pinMode(Motor2, OUTPUT);
+  pinMode(Phase1, OUTPUT);
+  pinMode(Phase2, OUTPUT);
+  //**********************
 }
 
 void loop() {
@@ -68,7 +84,6 @@ void loop() {
       delay(200);
       detener();
       delay(1100);
-
       if (giros == 0) {
         // Girar 90
         derecha(2100);
@@ -89,47 +104,49 @@ void loop() {
           giros = 1;
           atras();
           delay(35);
-
         }
-
       } else {
         // Girar 180
-
         izquierda(4100);
         detener();
         delay(245);
         giros = 0;
-
       }
       adelante();
-
-
     }
-
   }
-
 }
 
 void adelante() {
-  analogWrite(PWML, 100);
-  analogWrite(PWMR, 100);
+  analogWrite(PWML, velocidad);
+  analogWrite(PWMR, velocidad);
 
   digitalWrite(LWF, HIGH);
   digitalWrite(LWB, LOW);
 
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
+
+  analogWrite(Motor1, velocidad);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, velocidad);
+  digitalWrite(Phase2, 0);
 }
 
 void atras() {
-  analogWrite(PWML, 100);
-  analogWrite(PWMR, 100);
+  analogWrite(PWML, velocidad);
+  analogWrite(PWMR, velocidad);
 
   digitalWrite(LWF, LOW);
   digitalWrite(LWB, HIGH);
 
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
+
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, velocidad);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, velocidad);
 }
 
 void detener() {
@@ -138,11 +155,16 @@ void detener() {
 
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, LOW);
+
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, 0);
 }
 
 void derecha(int retraso) {
-  analogWrite(PWML, 50);
-  analogWrite(PWMR, 50);
+  analogWrite(PWML, velocidad / 2);
+  analogWrite(PWMR, velocidad / 2);
 
   digitalWrite(LWF, HIGH);
   digitalWrite(LWB, LOW);
@@ -150,12 +172,17 @@ void derecha(int retraso) {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
 
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, velocidad);
+  digitalWrite(Phase2, 0);
+
   delay(retraso);
 }
 
 void izquierda(int retraso) {
-  analogWrite(PWML, 50);
-  analogWrite(PWMR, 50);
+  analogWrite(PWML, velocidad / 2);
+  analogWrite(PWMR, velocidad / 2);
 
   digitalWrite(LWF, LOW);
   digitalWrite(LWB, HIGH);
@@ -163,5 +190,37 @@ void izquierda(int retraso) {
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
 
+  analogWrite(Motor1, velocidad);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, 0);
+
   delay(retraso);
+}
+
+/* Matriz */
+LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
+byte matriz[8] {
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+};
+int posX = 2;
+int posY = 3;
+
+void inicializarMatrizControlador() {
+  ledControl.shutdown(0, false);
+  ledControl.setIntensity(0, 15);
+  ledControl.clearDisplay(0);
+}
+
+void recorridoMatriz() {
+  for (int i = 0; i < 8; i++) {
+    ledControl.setRow(0, i, matriz[i]);
+  }
 }

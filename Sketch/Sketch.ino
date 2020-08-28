@@ -38,7 +38,6 @@ void setup() {
   peripheral_setup();
 
   inicializarMatrizControlador();
-  recorridoMatriz();
 
   // VARIABLES DE MOTORES
   pinMode(Motor1, OUTPUT);
@@ -64,6 +63,7 @@ void loop() {
     delay(5);
     derecha();
     delay(2);
+
   } else if (T1_LH(1, 0, 0)) {
     izquierda();
     delay(10);
