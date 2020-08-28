@@ -127,9 +127,9 @@ void adelante() {
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
 
-  analogWrite(Motor1, velocidad);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, velocidad);
+  digitalWrite(Motor1, velocidad);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
 }
 
@@ -156,9 +156,9 @@ void detener() {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, LOW);
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, 0);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, 0);
   digitalWrite(Phase2, 0);
 }
 
@@ -172,9 +172,9 @@ void derecha(int retraso) {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, velocidad);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
 
   delay(retraso);
@@ -190,9 +190,9 @@ void izquierda(int retraso) {
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
 
-  analogWrite(Motor1, velocidad);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, 0);
+  digitalWrite(Motor1, velocidad);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, 0);
   digitalWrite(Phase2, 0);
 
   delay(retraso);
