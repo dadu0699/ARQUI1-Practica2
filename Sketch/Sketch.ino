@@ -9,6 +9,7 @@
 #include <Turtle.h>
 
 #pragma GCC pop_options
+#include "LedControl.h"
 
 // Peripheral Constructors
 CPU &cpu = Cpu;
@@ -28,13 +29,16 @@ void peripheral_loop() {
 
 // Configuraciones Propias
 int velocidad = 100;
-int Motor1 = 3; //IZQ
-int Motor2 = 5; //DER
-int Phase1 = 2;
-int Phase2 = 4;
+int Motor1 = 50; //IZQ
+int Motor2 = 52; //DER
+int Phase1 = 51;
+int Phase2 = 53;
 
 void setup() {
   peripheral_setup();
+
+  inicializarMatrizControlador();
+  recorridoMatriz();
 
   // VARIABLES DE MOTORES
   pinMode(Motor1, OUTPUT);
@@ -184,9 +188,35 @@ void giro360Inverso() {
   analogWrite(Phase2, velocidad);
 }
 
-
 void esquivar() {
   detener();
+}
+
+ /* Matriz */
+LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
+byte matriz[8] {
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000,
+  B00000000
+};
+int posX = 2;
+int posY = 3;
+
+void inicializarMatrizControlador() {
+  ledControl.shutdown(0, false);
+  ledControl.setIntensity(0, 15);
+  ledControl.clearDisplay(0);
+}
+
+void recorridoMatriz(){
+  for (int i = 0; i < 8; i++) {
+    ledControl.setRow(0, i, matriz[i]);
+  }
 }
 /*
     T1_DRIVE.drive(wheel,dir,speed);
