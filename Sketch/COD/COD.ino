@@ -1,4 +1,5 @@
 #include "LedControl.h"
+#include <Servo.h>
 
 /*-------PINES---------*/
 //SENSORES DE CAMINO
@@ -18,6 +19,13 @@ int LWF = 5; //Izquierda al frente
 int LWB = 4; //Izquierda atras
 int RWF = 3; //Derecha al frente
 int RWB = 2; //Derecha atras
+
+//SERVO MOTOR 
+int PSVM = 35; 
+
+
+Servo motor; 
+int posicion = 0; 
 
 /*------VARIABLES------*/
 boolean camino = false;
@@ -46,6 +54,9 @@ void setup() {
   //PWM
   pinMode(PWML, OUTPUT);
   pinMode(PWMR, OUTPUT);
+
+  pinMode(PSVM, OUTPUT); 
+  motor.attach(PSVM); 
 
   //Matriz
   inicializarMatrizControlador();
@@ -223,4 +234,12 @@ void recorridoMatriz() {
   for (int i = 0; i < 8; i++) {
     ledControl.setRow(0, i, matriz[i]);
   }
+}
+
+void barredora3vueltas(){
+   for (posicion = 1; posicion <= 1080; posicion++){
+    motor.write(posicion); 
+    delay(15); 
+   }
+    delay(100); 
 }
