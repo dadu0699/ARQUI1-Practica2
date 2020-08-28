@@ -40,15 +40,19 @@ String matriz[8] {
   "00000000",
   "00000000"
 };
-int posX = 4;
-int posY = 4;
+int posX = 0;
+int posY = 0;
+boolean ziczacVH = true; // Vertical = true, Abajo = false;
+boolean ladoID = true;  // Izquierda = true, Derecha = false;
+boolean ladoAB = true; // Arriba = true, Abajo = false;
+int conteoCamino = 0;
 
 /*------VARIABLES------*/
 boolean camino = false;
 int giros = 0;
 
 int velocidad = 100;
-int Motor1 = 50; //IZQ
+int Motor1 = 50;  //IZQ
 int Motor2 = 52; //DER
 int Phase1 = 51;
 int Phase2 = 53;
@@ -57,7 +61,7 @@ void setup() {
   //Para el sensor Ultrasonico
   pinMode(OS1, INPUT);
   pinMode(OS2, INPUT);
-  
+
   pinMode(OS3, OUTPUT);
   tortuga.attach(OS3);
   tortuga.write(90);
@@ -96,31 +100,24 @@ void loop() {
 
   if ((ps1 == HIGH && ps2 == HIGH && ps3 == HIGH) || (ps1 == LOW && ps2 == HIGH && ps3 == LOW)) {
     camino = true;
-
-    posY--;
-    encender(posX, posY);
-
     adelante();
+
   } else if (ps1 == HIGH && ps2 == HIGH && ps3 == LOW) {
     camino = true;
     izquierda(1);
-
-    posX--;
-    encender(posX, posY);
-
     adelante();
+
   } else if (ps1 == HIGH && ps2 == LOW && ps3 == LOW) {
     camino = true;
+
   } else if (ps1 == LOW && ps2 == HIGH && ps3 == HIGH) {
     camino = true;
     derecha(1);
-
-    posX++;
-    encender(posX, posY);
-
     adelante();
+
   } else if (ps1 == LOW && ps2 == LOW && ps3 == HIGH) {
     camino = true;
+
   } else if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
     if (camino) {
       camino = false;
@@ -139,9 +136,25 @@ void loop() {
         ps2 = digitalRead(PS2P);
         detener();
         delay(1000);
+
         if ( ps2 == HIGH) {
           giros = 0;
           camino = true;
+
+          if (ziczacVH) {
+            if (ladoAB) {
+              ladoID = false;
+            } else {
+              ladoID = true;
+            }
+          } else {
+            if (ladoID) {
+              ladoAB = true;
+            } else {
+              ladoAB = false;
+            }
+          }
+          ziczacVH = !ziczacVH;
         } else {
           atras();
           delay(500);
@@ -155,6 +168,21 @@ void loop() {
         detener();
         delay(245);
         giros = 0;
+
+        if (ziczacVH) {
+          if (ladoAB) {
+            ladoID = true;
+          } else {
+            ladoID = false;
+          }
+        } else {
+          if (ladoID) {
+            ladoAB = false;
+          } else {
+            ladoAB = true;
+          }
+        }
+        ziczacVH = !ziczacVH;
       }
       adelante();
     }
@@ -176,6 +204,25 @@ void adelante() {
   digitalWrite(Phase1, 0);
   digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
+
+  conteoCamino++;
+  if (conteoCamino == 8) {
+    if (ziczacVH) {
+      if (ladoAB) {
+        posY--;
+      } else {
+        posY++;
+      }
+    } else {
+      if (ladoID) {
+        posX--;
+      } else {
+        posX++;
+      }
+    }
+    encender(posX, posY);
+    conteoCamino = 0;
+  }
 }
 
 void atras() {
@@ -249,8 +296,8 @@ void inicializarMatrizControlador() {
 
 void encender(int posAX, int posAY) {
   if (posAX > 7 || posAY > 7 || posAX < 0 || posAY < 0) {
-    posX = 4;
-    posY = 4;
+    posX = 0;
+    posY = 0;
     posAX = posX;
     posAY = posY;
 
