@@ -7,9 +7,9 @@
 #include <cpu.h>
 #include <Servo.h> // Required by T1:DRIVE
 #include <Turtle.h>
+#include "LedControl.h"
 
 #pragma GCC pop_options
-#include "LedControl.h"
 
 // Peripheral Constructors
 CPU &cpu = Cpu;
@@ -34,9 +34,33 @@ int Motor2 = 52; //DER
 int Phase1 = 51;
 int Phase2 = 53;
 
+// SERVO MOTOR
+int PSVM = 35;
+Servo motor;
+int posicion = 0;
+
+// MATRIZ
+LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
+String matriz[8] {
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000"
+};
+int posX = 4;
+int posY = 4;
+
 void setup() {
   peripheral_setup();
 
+  pinMode(PSVM, OUTPUT);
+  motor.attach(PSVM);
+
+  //Matriz
   inicializarMatrizControlador();
 
   // VARIABLES DE MOTORES
@@ -56,7 +80,6 @@ void loop() {
   if (T1_LH(1, 1, 1) || T1_LH(0, 1, 0)) {
     camino = true;
     adelante();
-    delay(25);
 
   } else if (T1_LH(1, 1, 0)) {
     izquierda();
@@ -120,9 +143,9 @@ void adelante() {
   //T1_DRIVE.drive(3,1,velocidad);
   T1_DRIVE.forwards(velocidad);
 
-  analogWrite(Motor1, velocidad);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, velocidad);
+  digitalWrite(Motor1, velocidad);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
 }
 
@@ -130,9 +153,9 @@ void atras() {
   //T1_DRIVE.drive(3,2,velocidad);
   T1_DRIVE.backwards(velocidad);
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, velocidad);
-  analogWrite(Motor2, 0);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, velocidad);
+  digitalWrite(Motor2, 0);
   digitalWrite(Phase2, velocidad);
 }
 
@@ -140,9 +163,9 @@ void derecha() {
   T1_DRIVE.drive(1, 1, velocidad * 0.75);
   T1_DRIVE.drive(2, 1, 0);
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, velocidad);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
 }
 
@@ -150,18 +173,18 @@ void izquierda() {
   T1_DRIVE.drive(2, 1, velocidad * 0.75);
   T1_DRIVE.drive(1, 1, 0);
 
-  analogWrite(Motor1, velocidad);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, 0);
+  digitalWrite(Motor1, velocidad);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, 0);
   digitalWrite(Phase2, 0);
 }
 
 void detener() {
   T1_DRIVE.stop();
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, 0);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, 0);
   digitalWrite(Phase2, 0);
 }
 
@@ -170,10 +193,10 @@ void giro360() {
   T1_DRIVE.drive(1, 1, velocidad);
   T1_DRIVE.drive(2, 2, velocidad);
 
-  analogWrite(Motor2, velocidad);
-  analogWrite(Phase2, 0);
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, velocidad);
+  digitalWrite(Motor2, velocidad);
+  digitalWrite(Phase2, 0);
+  digitalWrite(Motor1, 0);
+  digitalWrite(Phase1, velocidad);
 }
 
 void giro360Inverso() {
@@ -181,30 +204,20 @@ void giro360Inverso() {
   T1_DRIVE.drive(2, 1, velocidad);
   T1_DRIVE.drive(1, 2, velocidad);
 
-  analogWrite(Motor1, velocidad);
-  analogWrite(Phase1, 0);
-  analogWrite(Motor2, 0);
-  analogWrite(Phase2, velocidad);
+  digitalWrite(Motor1, velocidad);
+  digitalWrite(Phase1, 0);
+  digitalWrite(Motor2, 0);
+  digitalWrite(Phase2, velocidad);
 }
 
 void esquivar() {
   detener();
 }
-
- /* Matriz */
-LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
-byte matriz[8] {
-  B00000000,
-  B00000000,
-  B00000000,
-  B00000000,
-  B00000000,
-  B00000000,
-  B00000000,
-  B00000000
-};
-int posX = 2;
-int posY = 3;
+/*
+    T1_DRIVE.drive(wheel,dir,speed);
+    @Wheel: 1(Izquierda), 2(Derecha), 3(Ambas)
+    @Dir: 1(Adelante), 2(Atras)
+*/
 
 void inicializarMatrizControlador() {
   ledControl.shutdown(0, false);
@@ -212,13 +225,52 @@ void inicializarMatrizControlador() {
   ledControl.clearDisplay(0);
 }
 
-void recorridoMatriz(){
-  for (int i = 0; i < 8; i++) {
-    ledControl.setRow(0, i, matriz[i]);
+void encender(int posAX, int posAY) {
+  if (posAX > 7 || posAY > 7 || posAX < 0 || posAY < 0) {
+    posX = 4;
+    posY = 4;
+    posAX = posX;
+    posAY = posY;
+
+    for (int i = 0; i < 8; i++) {
+      matriz[i] = "00000000";
+    }
+    ledControl.clearDisplay(0);
+    delay(100);
   }
+
+  String cadena = matriz[posY];
+  String parte1 = "";
+  String parte2 = "";
+
+  for (int i = 0; i < posAX; i++) {
+    parte1 += matriz[posAY].charAt(i);
+  }
+
+  for (int i = posX + 1; i < 8; i++) {
+    parte2 += matriz[posAY].charAt(i);
+  }
+
+  matriz[posAY] = parte1 + "1" + parte2;
 }
-/*
-    T1_DRIVE.drive(wheel,dir,speed);
-    @Wheel: 1(Izquierda), 2(Derecha), 3(Ambas)
-    @Dir: 1(Adelante), 2(Atras)
-*/
+
+void recorridoMatriz() {
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (matriz[i].charAt(j) == '1') {
+        ledControl.setLed(0, i, j, true);
+      } else {
+        ledControl.setLed(0, i, j, false);
+      }
+    }
+  }
+  delay(100);
+}
+
+void barredora3vueltas() {
+  for (posicion = 1; posicion <= 1080; posicion++) {
+    motor.write(posicion);
+    delay(15);
+  }
+  delay(100);
+}
