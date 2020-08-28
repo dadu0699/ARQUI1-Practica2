@@ -63,7 +63,6 @@ void loop() {
     delay(5);
     derecha();
     delay(2);
-
   } else if (T1_LH(1, 0, 0)) {
     izquierda();
     delay(10);
