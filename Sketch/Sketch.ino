@@ -33,25 +33,52 @@ void setup () {
   peripheral_setup();
 }
 
+boolean camino = false;
 
 void loop() {
   peripheral_loop();
+
   if (T1_LH(1, 1, 1) || T1_LH(0, 1, 0)) {
+    camino = true;
     adelante();
+    delay(25);
+    
   } else if (T1_LH(1, 1, 0)) {
     izquierda();
+    delay(5);
+    derecha();
+    delay(2);
   } else if (T1_LH(1, 0, 0)) {
     izquierda();
     delay(10);
+    derecha();
+    delay(5);
+    
   } else if (T1_LH(0, 1, 1)) {
     derecha();
+    delay(5);
+    izquierda();
+    delay(2);
+    
   } else if (T1_LH(0, 0, 1)) {
     derecha();
     delay(10);
+    izquierda();
+    delay(5);
+    
   } else if (T1_LH(0, 0, 0)) {
-    detener();
+    if (camino) {
+      atras();
+      delay(243);
+      detener();
+      delay(1100);
+      // Girar 90
+      giro360();
+      delay(1000);
+      detener();
+    }
+    delay(25);
   }
-  delay(25);
 }
 
 void adelante() {
