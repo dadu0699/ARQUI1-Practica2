@@ -28,9 +28,20 @@ void peripheral_loop() {
 
 // Configuraciones Propias
 int velocidad = 100;
+int Motor1 = 3; //IZQ
+int Motor2 = 5; //DER
+int Phase1 = 2;
+int Phase2 = 4;
 
 void setup() {
   peripheral_setup();
+
+  // VARIABLES DE MOTORES
+  pinMode(Motor1, OUTPUT);
+  pinMode(Motor2, OUTPUT);
+  pinMode(Phase1, OUTPUT);
+  pinMode(Phase2, OUTPUT);
+  //**********************
 }
 
 boolean camino = false;
@@ -105,37 +116,72 @@ void loop() {
 void adelante() {
   //T1_DRIVE.drive(3,1,velocidad);
   T1_DRIVE.forwards(velocidad);
+
+  analogWrite(Motor1, velocidad);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, velocidad);
+  digitalWrite(Phase2, 0);
 }
 
 void atras() {
   //T1_DRIVE.drive(3,2,velocidad);
   T1_DRIVE.backwards(velocidad);
+
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, velocidad);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, velocidad);
 }
 
 void derecha() {
   T1_DRIVE.drive(1, 1, velocidad * 0.75);
   T1_DRIVE.drive(2, 1, 0);
+
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, velocidad);
+  digitalWrite(Phase2, 0);
 }
 
 void izquierda() {
   T1_DRIVE.drive(2, 1, velocidad * 0.75);
   T1_DRIVE.drive(1, 1, 0);
+
+  analogWrite(Motor1, velocidad);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, 0);
 }
 
 void detener() {
   T1_DRIVE.stop();
+
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, 0);
+  digitalWrite(Phase2, 0);
 }
 
 void giro360() {
   //T1_DRIVE.turn(velocidad);
   T1_DRIVE.drive(1, 1, velocidad);
   T1_DRIVE.drive(2, 2, velocidad);
+
+  analogWrite(Motor2, velocidad);
+  analogWrite(Phase2, 0);
+  analogWrite(Motor1, 0);
+  analogWrite(Phase1, velocidad);
 }
 
 void giro360Inverso() {
   //T1_DRIVE.turn(velocidad);
   T1_DRIVE.drive(2, 1, velocidad);
   T1_DRIVE.drive(1, 2, velocidad);
+
+  analogWrite(Motor1, velocidad);
+  analogWrite(Phase1, 0);
+  analogWrite(Motor2, 0);
+  analogWrite(Phase2, velocidad);
 }
 
 
