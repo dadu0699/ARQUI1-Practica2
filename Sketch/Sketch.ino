@@ -39,7 +39,7 @@ int PSVM = 35;
 Servo motor;
 int posicion = 0;
 
-// MATRIZ
+/* Matriz */
 LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
 String matriz[8] {
   "00000000",
@@ -51,8 +51,12 @@ String matriz[8] {
   "00000000",
   "00000000"
 };
-int posX = 4;
-int posY = 4;
+int posX = 2;
+int posY = 6;
+boolean ziczacVH = true; // Vertical = true, Abajo = false;
+boolean ladoID = true;  // Izquierda = true, Derecha = false;
+boolean ladoAB = true; // Arriba = true, Abajo = false;
+int conteoCamino = 0;
 
 void setup() {
   peripheral_setup();
@@ -121,6 +125,20 @@ void loop() {
         delay(35);
         if (T1_LH(1, 1, 1) || T1_LH(0, 1, 0)) {
           giros = 0;
+          if (ziczacVH) {
+            if (ladoAB) {
+              ladoID = false;
+            } else {
+              ladoID = true;
+            }
+          } else {
+            if (ladoID) {
+              ladoAB = true;
+            } else {
+              ladoAB = false;
+            }
+          }
+          ziczacVH = !ziczacVH;
         } else {
           giros = 1;
           atras();
@@ -133,10 +151,26 @@ void loop() {
         delay(2000);
         detener();
         giros = 0;
+
+        if (ziczacVH) {
+          if (ladoAB) {
+            ladoID = true;
+          } else {
+            ladoID = false;
+          }
+        } else {
+          if (ladoID) {
+            ladoAB = false;
+          } else {
+            ladoAB = true;
+          }
+        }
+        ziczacVH = !ziczacVH;
       }
     }
     delay(25);
   }
+  recorridoMatriz();
 }
 
 void adelante() {
@@ -147,6 +181,25 @@ void adelante() {
   digitalWrite(Phase1, 0);
   digitalWrite(Motor2, velocidad);
   digitalWrite(Phase2, 0);
+
+  conteoCamino++;
+  if (conteoCamino == 8) {
+    if (ziczacVH) {
+      if (ladoAB) {
+        posY--;
+      } else {
+        posY++;
+      }
+    } else {
+      if (ladoID) {
+        posX--;
+      } else {
+        posX++;
+      }
+    }
+    encender(posX, posY);
+    conteoCamino = 0;
+  }
 }
 
 void atras() {
@@ -227,8 +280,8 @@ void inicializarMatrizControlador() {
 
 void encender(int posAX, int posAY) {
   if (posAX > 7 || posAY > 7 || posAX < 0 || posAY < 0) {
-    posX = 4;
-    posY = 4;
+    posX = 3;
+    posY = 3;
     posAX = posX;
     posAY = posY;
 
