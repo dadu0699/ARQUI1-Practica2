@@ -2,7 +2,7 @@
 #include <Servo.h>
 #include <Stepper.h>
 
-/*-------PINES---------*/
+/*----------------------------  P  I  N  E  S  ------------------------------*/
 //SENSORES DE CAMINO
 int PS1P = 13;
 int PS2P = 12;
@@ -20,12 +20,11 @@ int LWF = 5; //Izquierda al frente
 int LWB = 4; //Izquierda atras
 int RWF = 3; //Derecha al frente
 int RWB = 2; //Derecha atras
-
 // SERVO MOTOR
-int PSVM = 35;
 Servo motor;
+int PSVM = 35;
 int posicion = 0;
-
+int objeto = 31;//Led Amarilla
 // SERVO TORTUGA
 Servo tortuga;
 
@@ -53,7 +52,7 @@ boolean ladoID = true;  // Izquierda = true, Derecha = false;
 boolean ladoAB = true; // Arriba = true, Abajo = false;
 int conteoCamino = 0;
 
-/*------VARIABLES------*/
+/*--------------------------  V  A  R  I  A  B  L  E  S --------------------------*/
 boolean camino = false;
 int giros = 0;
 
@@ -63,15 +62,20 @@ int Motor2 = 52; //DER
 int Phase1 = 51;
 int Phase2 = 53;
 
-void setup() {
+void setup() {/*--------------------------  S  E  T  U  P  --------------------------*/
+  Serial.begin(9600);
+  Serial.println(">> UNIVERSIDAD DE SAN CARLOS DE GUATEMALA");
+  Serial.println(">> I N G E N I E R I A");
+  Serial.println(">> A R Q U I   1");
+  Serial.println(">> G R U P O  3");
+  Serial.println("\n");
+  
   //Para el sensor Ultrasonico
   pinMode(OS1, INPUT);
   pinMode(OS2, INPUT);
-
   pinMode(OS3, OUTPUT);
   tortuga.attach(OS3);
   tortuga.write(90);
-
   //Sensores
   pinMode(PS1P, INPUT);
   pinMode(PS2P, INPUT);
@@ -84,29 +88,37 @@ void setup() {
   //PWM
   pinMode(PWML, OUTPUT);
   pinMode(PWMR, OUTPUT);
-
-  pinMode(PSVM, OUTPUT);
-  motor.attach(PSVM);
-
   //Matriz
   inicializarMatrizControlador();
-
   // VARIABLES DE MOTORES
+  //Stepper
   pinMode(Motor1, OUTPUT);
   pinMode(Motor2, OUTPUT);
   pinMode(Phase1, OUTPUT);
   pinMode(Phase2, OUTPUT);
-  //**********************
-
   stepperIZQ.setSpeed(velocidad);
   stepperDCHO.setSpeed(velocidad);
+  //Servo
+  pinMode(PSVM, OUTPUT);
+  pinMode(objeto, OUTPUT);
 }
 
-void loop() {
+void loop() { /*--------------------------  L  O  O  P  --------------------------*/
   ps1 = digitalRead(PS1P);
   ps2 = digitalRead(PS2P);
   ps3 = digitalRead(PS3P);
 
+  // SENSOR DE OBJETOS
+  int sensorValue = analogRead(A0);
+  if(sensorValue >= 36 && sensorValue <= 42){//Amarillo
+    Serial.println("\nO B J E T O\n");
+    digitalWrite(31, HIGH);
+    barredora3vueltas();
+  }else{
+    digitalWrite(31, LOW);
+  }
+
+  // MOVIMIENTO DE LA TORTUGA
   if ((ps1 == HIGH && ps2 == HIGH && ps3 == HIGH) || (ps1 == LOW && ps2 == HIGH && ps3 == LOW)) {
     camino = true;
     stepperIZQ.step(1);
@@ -262,6 +274,7 @@ void adelante() {
   }
 }
 
+/*--------------------------  M E T O D O S    DE    M O V I M I E N T O  --------------------------*/
 void atras() {
   analogWrite(PWML, velocidad);
   analogWrite(PWMR, velocidad);
@@ -305,6 +318,7 @@ void izquierda(int retraso) {
   delay(retraso);
 }
 
+/*--------------------------  M  A  T  R  I  Z  --------------------------*/
 void inicializarMatrizControlador() {
   ledControl.shutdown(0, false);
   ledControl.setIntensity(0, 15);
@@ -369,10 +383,16 @@ void recorridoMatriz() {
   delay(100);
 }
 
+/*--------------------------  B A R R E D O R A  --------------------------*/
 void barredora3vueltas() {
-  for (posicion = 1; posicion <= 1080; posicion++) {
+  Serial.println("A  B A R R E R!");
+  Serial.println("- - - - -");
+  motor.attach(PSVM);
+  for (posicion = 1; posicion <= 977; posicion++) {
     motor.write(posicion);
     delay(15);
   }
-  delay(100);
+  //motor.attach(PSVM);
+  Serial.println("L I S T O!");
+  Serial.println("\n");
 }
