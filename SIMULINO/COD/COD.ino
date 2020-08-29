@@ -47,6 +47,16 @@ String matriz[8] {
   "00000000",
   "00000000"
 };
+String matriz2[8] {
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000",
+  "00000000"
+};
 int posX = 2;
 int posY = 6;
 boolean ziczacVH = true; // Vertical = true, Abajo = false;
@@ -121,14 +131,14 @@ void loop() {
   boolean obstaculo = true;
   //evaluar();
   //detener();
-  if(encontrar){
-  digitalWrite(OS1, HIGH);
-  delayMicroseconds(5);
-  digitalWrite(OS1, LOW);
+  if (encontrar) {
+    digitalWrite(OS1, HIGH);
+    delayMicroseconds(5);
+    digitalWrite(OS1, LOW);
 
-  t = pulseIn(OS2, HIGH);
-  d = t / 59;
-    }
+    t = pulseIn(OS2, HIGH);
+    d = t / 59;
+  }
 
   /*Serial.println("Original");
     Serial.println(t);*/
@@ -173,8 +183,8 @@ void evaluar() {
     detener();
     //Serial.println("DETENTE");
   }
-
 }
+
 void avanzar(int cuanto) {
 
   ps1 = digitalRead(PS1P);
@@ -331,62 +341,90 @@ void avanzar(int cuanto) {
 /*--------------------------  M E T O D O S    DE    M O V I M I E N T O  --------------------------*/
 
 void esquivar() {
-  Serial.println("E S Q U I V A N D O   O B J E T O");
+  Serial.println("\nE S Q U I V A N D O   O B J E T O");
   derecha(2100);
   detener();
-        stepperIZQ.step(1);
-        delay(100);
-        stepperIZQ.step(1);
-        delay(100);
+
+  stepperIZQ.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  delay(100);
   detener();
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
+
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
   adelante();
   delay(2000);
+
   izquierda(2100);
   detener();
-        stepperDCHO.step(1);
-        delay(100);
-        stepperDCHO.step(1);
-        delay(100);
+
+  stepperDCHO.step(1);
+  delay(100);
+  stepperDCHO.step(1);
+  delay(100);
   detener();
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
+
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
   adelante();
   delay(3500);
+
   izquierda(2100);
   detener();
-        stepperDCHO.step(1);
-        delay(100);
-        stepperDCHO.step(1);
-        delay(100);
+
+  stepperDCHO.step(1);
+  delay(100);
+  stepperDCHO.step(1);
+  delay(100);
   detener();
-        stepperIZQ.step(1);
-        stepperDCHO.step(1);
-        delay(100);
+
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  stepperDCHO.step(1);
+  delay(100);
   adelante();
   delay(2000);
+
   derecha(2100);
   detener();
-        stepperIZQ.step(1);
-        delay(100);
-        stepperIZQ.step(1);
-        delay(100);
+  stepperIZQ.step(1);
+  delay(100);
+  stepperIZQ.step(1);
+  delay(100);
   detener();
   Serial.println("L I S T O!");
   Serial.println("\n");
 }
+
 void adelante() {
   analogWrite(PWML, velocidad);
   analogWrite(PWMR, velocidad);
@@ -412,7 +450,7 @@ void adelante() {
         posX++;
       }
     }
-    encender(posX, posY);
+    encender(posX, posY, false);
     conteoCamino = 0;
   }
 }
@@ -467,7 +505,7 @@ void inicializarMatrizControlador() {
   ledControl.clearDisplay(0);
 }
 
-void encender(int posAX, int posAY) {
+void encender(int posAX, int posAY, boolean barrer) {
   if (posAX > 7 || posAY > 7 || posAX < 0 || posAY < 0) {
     posX = 3;
     posY = 3;
@@ -476,40 +514,37 @@ void encender(int posAX, int posAY) {
 
     for (int i = 0; i < 8; i++) {
       matriz[i] = "00000000";
+      matriz2[i] = "00000000";
     }
     ledControl.clearDisplay(0);
     delay(100);
+
+    Serial.println("\nMATRIZ REINICIADITA!");
+    Serial.println("- - - - -\n");
   }
 
   String cadena = matriz[posY];
   String parte1 = "";
   String parte2 = "";
+  String parte1M2 = "";
+  String parte2M2 = "";
 
   for (int i = 0; i < posAX; i++) {
     parte1 += matriz[posAY].charAt(i);
+    parte1M2 += matriz2[posAY].charAt(i);
   }
 
   for (int i = posX + 1; i < 8; i++) {
     parte2 += matriz[posAY].charAt(i);
+    parte2M2 += matriz2[posAY].charAt(i);
   }
 
   matriz[posAY] = parte1 + "1" + parte2;
-}
-
-void objetoMatriz(int posAX, int posAY) {
-  String cadena = matriz[posY];
-  String parte1 = "";
-  String parte2 = "";
-
-  for (int i = 0; i < posAX; i++) {
-    parte1 += matriz[posAY].charAt(i);
+  if (!barrer) {
+    matriz2[posAY] = parte1M2 + "1" + parte2M2;
+  } else {
+    matriz2[posAY] = parte1M2 + "0" + parte2M2;
   }
-
-  for (int i = posX + 1; i < 8; i++) {
-    parte2 += matriz[posAY].charAt(i);
-  }
-
-  matriz[posAY] = parte1 + "2" + parte2;
 }
 
 void recorridoMatriz() {
@@ -523,12 +558,24 @@ void recorridoMatriz() {
     }
   }
   delay(100);
+
+  for (int i = 0; i < 8; i++) {
+    for (int j = 0; j < 8; j++) {
+      if (matriz2[i].charAt(j) == '1') {
+        ledControl.setLed(0, i, j, true);
+      } else {
+        ledControl.setLed(0, i, j, false);
+      }
+    }
+  }
+  delay(100);
 }
 
 
 /*--------------------------  B A R R E D O R A  --------------------------*/
 void barredora3vueltas() {
-  Serial.println("A  B A R R E R!");
+  detener();
+  Serial.println("\nA  B A R R E R!");
   Serial.println("- - - - -");
   motor.attach(PSVM);
   for (posicion = 1; posicion <= 977; posicion++) {
@@ -536,6 +583,22 @@ void barredora3vueltas() {
     delay(15);
   }
   //motor.attach(PSVM);
+
+  if (ziczacVH) {
+    if (ladoAB) {
+      posY--;
+    } else {
+      posY++;
+    }
+  } else {
+    if (ladoID) {
+      posX--;
+    } else {
+      posX++;
+    }
+  }
+  encender(posX, posY, true);
+
   Serial.println("L I S T O!");
   Serial.println("\n");
 }
