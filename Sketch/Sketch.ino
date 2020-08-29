@@ -7,6 +7,7 @@
 #include <cpu.h>
 #include <Servo.h> // Required by T1:DRIVE
 #include <Turtle.h>
+#include <Stepper.h>
 #include "LedControl.h"
 
 #pragma GCC pop_options
@@ -38,6 +39,10 @@ int Phase2 = 53;
 int PSVM = 35;
 Servo motor;
 int posicion = 0;
+
+// Stepper
+Stepper stepperIZQ(20, 50, 51, 52, 53);
+Stepper stepperDCHO(20, 22, 23, 24, 25);
 
 /* Matriz */
 LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)

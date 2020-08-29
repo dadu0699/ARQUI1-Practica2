@@ -1,5 +1,6 @@
 #include "LedControl.h"
 #include <Servo.h>
+#include <Stepper.h>
 
 /*-------PINES---------*/
 //SENSORES DE CAMINO
@@ -27,6 +28,10 @@ int posicion = 0;
 
 // SERVO TORTUGA
 Servo tortuga;
+
+// Stepper
+Stepper stepperIZQ(200, 50, 51, 52, 53);
+Stepper stepperDCHO(200, 22, 23, 24, 25);
 
 /* Matriz */
 LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
@@ -200,10 +205,10 @@ void adelante() {
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
 
-  digitalWrite(Motor1, velocidad);
-  digitalWrite(Phase1, 0);
-  digitalWrite(Motor2, velocidad);
-  digitalWrite(Phase2, 0);
+  stepperIZQ.setSpeed(velocidad);
+  stepperIZQ.step(1);
+  stepperDCHO.setSpeed(velocidad);
+  stepperDCHO.step(1);
 
   conteoCamino++;
   if (conteoCamino == 8) {
@@ -235,10 +240,10 @@ void atras() {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
 
-  analogWrite(Motor1, 0);
-  analogWrite(Phase1, velocidad);
-  analogWrite(Motor2, 0);
-  digitalWrite(Phase2, velocidad);
+  stepperIZQ.setSpeed(velocidad);
+  stepperIZQ.step(-1);
+  stepperDCHO.setSpeed(velocidad);
+  stepperDCHO.step(-1);
 }
 
 void detener() {
@@ -248,10 +253,8 @@ void detener() {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, LOW);
 
-  digitalWrite(Motor1, 0);
-  digitalWrite(Phase1, 0);
-  digitalWrite(Motor2, 0);
-  digitalWrite(Phase2, 0);
+  stepperIZQ.setSpeed(5);
+  stepperDCHO.setSpeed(5);
 }
 
 void derecha(int retraso) {
@@ -263,12 +266,17 @@ void derecha(int retraso) {
 
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
-
-  digitalWrite(Motor1, 0);
-  digitalWrite(Phase1, 0);
-  digitalWrite(Motor2, velocidad / 2);
-  digitalWrite(Phase2, 0);
   delay(retraso);
+
+
+  digitalWrite(LWF, LOW);
+  digitalWrite(LWB, LOW);
+  digitalWrite(RWF, LOW);
+  digitalWrite(RWB, LOW);
+  stepperIZQ.setSpeed(5);
+  stepperIZQ.step(1);
+  stepperDCHO.setSpeed(velocidad / 2);
+  stepperDCHO.step(1);
 }
 
 void izquierda(int retraso) {
@@ -280,12 +288,16 @@ void izquierda(int retraso) {
 
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
-
-  digitalWrite(Motor1, velocidad / 2);
-  digitalWrite(Phase1, 0);
-  digitalWrite(Motor2, 0);
-  digitalWrite(Phase2, 0);
   delay(retraso);
+
+  digitalWrite(LWF, LOW);
+  digitalWrite(LWB, LOW);
+  digitalWrite(RWF, LOW);
+  digitalWrite(RWB, LOW);
+  stepperIZQ.setSpeed(velocidad / 2);
+  stepperIZQ.step(1);
+  stepperDCHO.setSpeed(5);
+  stepperDCHO.step(1);
 }
 
 void inicializarMatrizControlador() {
@@ -321,6 +333,22 @@ void encender(int posAX, int posAY) {
   }
 
   matriz[posAY] = parte1 + "1" + parte2;
+}
+
+void objetoMatriz(int posAX, int posAY) {
+  String cadena = matriz[posY];
+  String parte1 = "";
+  String parte2 = "";
+
+  for (int i = 0; i < posAX; i++) {
+    parte1 += matriz[posAY].charAt(i);
+  }
+
+  for (int i = posX + 1; i < 8; i++) {
+    parte2 += matriz[posAY].charAt(i);
+  }
+
+  matriz[posAY] = parte1 + "2" + parte2;
 }
 
 void recorridoMatriz() {
