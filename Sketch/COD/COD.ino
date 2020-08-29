@@ -30,8 +30,9 @@ int posicion = 0;
 Servo tortuga;
 
 // Stepper
-Stepper stepperIZQ(200, 50, 51, 52, 53);
-Stepper stepperDCHO(200, 22, 23, 24, 25);
+#define PASOS 200
+Stepper stepperIZQ(PASOS, 50, 51, 52, 53);
+Stepper stepperDCHO(PASOS, 22, 23, 24, 25);
 
 /* Matriz */
 LedControl ledControl = LedControl(47, 48, 49, 1); // LedControl(DIN, CLK, CS / LOAD, # dispositivos)
@@ -96,6 +97,9 @@ void setup() {
   pinMode(Phase1, OUTPUT);
   pinMode(Phase2, OUTPUT);
   //**********************
+
+  stepperIZQ.setSpeed(velocidad);
+  stepperDCHO.setSpeed(velocidad);
 }
 
 void loop() {
@@ -105,11 +109,17 @@ void loop() {
 
   if ((ps1 == HIGH && ps2 == HIGH && ps3 == HIGH) || (ps1 == LOW && ps2 == HIGH && ps3 == LOW)) {
     camino = true;
+    stepperIZQ.step(1);
+    stepperDCHO.step(1);
     adelante();
 
   } else if (ps1 == HIGH && ps2 == HIGH && ps3 == LOW) {
     camino = true;
+    stepperDCHO.step(1);
     izquierda(1);
+
+    stepperIZQ.step(1);
+    stepperDCHO.step(1);
     adelante();
 
   } else if (ps1 == HIGH && ps2 == LOW && ps3 == LOW) {
@@ -117,7 +127,11 @@ void loop() {
 
   } else if (ps1 == LOW && ps2 == HIGH && ps3 == HIGH) {
     camino = true;
+    stepperIZQ.step(1);
     derecha(1);
+
+    stepperIZQ.step(1);
+    stepperDCHO.step(1);
     adelante();
 
   } else if (ps1 == LOW && ps2 == LOW && ps3 == HIGH) {
@@ -126,18 +140,26 @@ void loop() {
   } else if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
     if (camino) {
       camino = false;
+      stepperIZQ.step(-1);
+      stepperDCHO.step(-1);
       atras();
       delay(200);
+
       detener();
       delay(1100);
       if (giros == 0) {
         // Girar 90
+        stepperIZQ.step(1);
         derecha(2100);
+
         detener();
         delay(245);
 
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
         adelante();
         delay(500);
+
         ps2 = digitalRead(PS2P);
         detener();
         delay(1000);
@@ -161,15 +183,23 @@ void loop() {
           }
           ziczacVH = !ziczacVH;
         } else {
+          stepperIZQ.step(-1);
+          stepperDCHO.step(-1);
           atras();
           delay(500);
+
           giros = 1;
+
+          stepperIZQ.step(-1);
+          stepperDCHO.step(-1);
           atras();
           delay(35);
         }
       } else {
         // Girar 180
+        stepperDCHO.step(1);
         izquierda(4100);
+
         detener();
         delay(245);
         giros = 0;
@@ -189,6 +219,8 @@ void loop() {
         }
         ziczacVH = !ziczacVH;
       }
+      stepperIZQ.step(1);
+      stepperDCHO.step(1);
       adelante();
     }
   }
@@ -204,11 +236,6 @@ void adelante() {
 
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
-
-  stepperIZQ.setSpeed(velocidad);
-  stepperIZQ.step(1);
-  stepperDCHO.setSpeed(velocidad);
-  stepperDCHO.step(1);
 
   conteoCamino++;
   if (conteoCamino == 8) {
@@ -239,11 +266,6 @@ void atras() {
 
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
-
-  stepperIZQ.setSpeed(velocidad);
-  stepperIZQ.step(-1);
-  stepperDCHO.setSpeed(velocidad);
-  stepperDCHO.step(-1);
 }
 
 void detener() {
@@ -252,9 +274,6 @@ void detener() {
 
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, LOW);
-
-  stepperIZQ.setSpeed(5);
-  stepperDCHO.setSpeed(5);
 }
 
 void derecha(int retraso) {
@@ -267,16 +286,6 @@ void derecha(int retraso) {
   digitalWrite(RWF, LOW);
   digitalWrite(RWB, HIGH);
   delay(retraso);
-
-
-  digitalWrite(LWF, LOW);
-  digitalWrite(LWB, LOW);
-  digitalWrite(RWF, LOW);
-  digitalWrite(RWB, LOW);
-  stepperIZQ.setSpeed(5);
-  stepperIZQ.step(1);
-  stepperDCHO.setSpeed(velocidad / 2);
-  stepperDCHO.step(1);
 }
 
 void izquierda(int retraso) {
@@ -289,15 +298,6 @@ void izquierda(int retraso) {
   digitalWrite(RWF, HIGH);
   digitalWrite(RWB, LOW);
   delay(retraso);
-
-  digitalWrite(LWF, LOW);
-  digitalWrite(LWB, LOW);
-  digitalWrite(RWF, LOW);
-  digitalWrite(RWB, LOW);
-  stepperIZQ.setSpeed(velocidad / 2);
-  stepperIZQ.step(1);
-  stepperDCHO.setSpeed(5);
-  stepperDCHO.step(1);
 }
 
 void inicializarMatrizControlador() {
