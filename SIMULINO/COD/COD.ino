@@ -57,7 +57,7 @@ int conteoCamino = 0;
 /*------VARIABLES------*/
 boolean camino = false;
 int giros = 0;
-
+boolean encontrar = true;
 int velocidad = 100;
 int Motor1 = 50;  //IZQ
 int Motor2 = 52; //DER
@@ -115,19 +115,23 @@ void loop() {
   long t;
   long sus;
   long auxT;
-  long d;
+  long d = 0;
   int contar = 0;
   boolean seguir = true;
   boolean obstaculo = true;
-  detener();
+  //evaluar();
+  //detener();
+  if(encontrar){
   digitalWrite(OS1, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(5);
   digitalWrite(OS1, LOW);
 
   t = pulseIn(OS2, HIGH);
   d = t / 59;
+    }
+
   /*Serial.println("Original");
-  Serial.println(t);*/
+    Serial.println(t);*/
   if (d > 0) {
 
     while (t > 60) {
@@ -142,11 +146,11 @@ void loop() {
       if (auxT != 0) {
         t = auxT;
       }
-     /* Serial.println("Auxiliar");
-      Serial.println(auxT);
-      Serial.println("Tiempo");
-      Serial.println(t);*/
-      avanzar();
+      /* Serial.println("Auxiliar");
+        Serial.println(auxT);
+        Serial.println("Tiempo");
+        Serial.println(t);*/
+      avanzar(15);
       if (contar > 1) {
         obstaculo = false;
         break;
@@ -157,14 +161,25 @@ void loop() {
       esquivar();
     }
   } else {
-    avanzar();
+    avanzar(15);
   }
 }
-void avanzar() {
+
+void evaluar() {
   ps1 = digitalRead(PS1P);
   ps2 = digitalRead(PS2P);
   ps3 = digitalRead(PS3P);
+  if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
+    detener();
+    //Serial.println("DETENTE");
+  }
 
+}
+void avanzar(int cuanto) {
+
+  ps1 = digitalRead(PS1P);
+  ps2 = digitalRead(PS2P);
+  ps3 = digitalRead(PS3P);
   // SENSOR DE OBJETOS
   int sensorValue = analogRead(A0);
   if (sensorValue >= 36 && sensorValue <= 42) { //Amarillo
@@ -186,7 +201,7 @@ void avanzar() {
   } else if (ps1 == HIGH && ps2 == HIGH && ps3 == LOW) {
     camino = true;
     stepperDCHO.step(1);
-    izquierda(12);
+    izquierda(cuanto + 5);
 
     stepperIZQ.step(1);
     stepperDCHO.step(1);
@@ -194,13 +209,13 @@ void avanzar() {
 
   } else if (ps1 == HIGH && ps2 == LOW && ps3 == LOW) {
     camino = true;
-    izquierda(17);
+    izquierda(cuanto);
     adelante();
 
   } else if (ps1 == LOW && ps2 == HIGH && ps3 == HIGH) {
     camino = true;
     stepperIZQ.step(1);
-    derecha(12);
+    derecha(cuanto + 5);
 
     stepperIZQ.step(1);
     stepperDCHO.step(1);
@@ -208,7 +223,7 @@ void avanzar() {
 
   } else if (ps1 == LOW && ps2 == LOW && ps3 == HIGH) {
     camino = true;
-    derecha(17);
+    derecha(cuanto);
     adelante();
 
   } else if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
@@ -216,8 +231,12 @@ void avanzar() {
       camino = false;
       stepperIZQ.step(-1);
       stepperDCHO.step(-1);
+      while (!digitalRead(PS1P) && !digitalRead(PS2P) && !digitalRead(PS3P) ) {
+        atras();
+      }
       atras();
-      delay(200);
+      delay(150);
+
 
       detener();
       delay(1100);
@@ -232,13 +251,14 @@ void avanzar() {
         stepperIZQ.step(1);
         stepperDCHO.step(1);
         adelante();
-        delay(400);
+        delay(500);
 
         ps2 = digitalRead(PS2P);
         detener();
         delay(1000);
 
         if ( ps2 == HIGH) {
+          encontrar = true;
           giros = 0;
           camino = true;
 
@@ -257,6 +277,7 @@ void avanzar() {
           }
           ziczacVH = !ziczacVH;
         } else {
+          encontrar = false;
           stepperIZQ.step(-1);
           stepperDCHO.step(-1);
           atras();
@@ -271,6 +292,7 @@ void avanzar() {
         }
       } else {
         // Girar 180
+        encontrar = true;
         izquierda(4100);
 
         detener();
@@ -312,17 +334,55 @@ void esquivar() {
   Serial.println("E S Q U I V A N D O   O B J E T O");
   derecha(2100);
   detener();
+        stepperIZQ.step(1);
+        delay(100);
+        stepperIZQ.step(1);
+        delay(100);
+  detener();
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
   adelante();
   delay(2000);
   izquierda(2100);
   detener();
+        stepperDCHO.step(1);
+        delay(100);
+        stepperDCHO.step(1);
+        delay(100);
+  detener();
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
   adelante();
   delay(3500);
   izquierda(2100);
   detener();
+        stepperDCHO.step(1);
+        delay(100);
+        stepperDCHO.step(1);
+        delay(100);
+  detener();
+        stepperIZQ.step(1);
+        stepperDCHO.step(1);
+        delay(100);
   adelante();
   delay(2000);
   derecha(2100);
+  detener();
+        stepperIZQ.step(1);
+        delay(100);
+        stepperIZQ.step(1);
+        delay(100);
   detener();
   Serial.println("L I S T O!");
   Serial.println("\n");
@@ -400,6 +460,7 @@ void izquierda(int retraso) {
   delay(retraso);
 }
 
+/*----------------MATRIZ--------------------*/
 void inicializarMatrizControlador() {
   ledControl.shutdown(0, false);
   ledControl.setIntensity(0, 15);
