@@ -197,8 +197,13 @@ void loop() {
         }
       } else {
         // Girar 180
-        stepperDCHO.step(1);
         izquierda(4100);
+
+        detener();
+        stepperDCHO.step(1);
+        delay(100);
+        stepperDCHO.step(1);
+        delay(100);
 
         detener();
         delay(245);
