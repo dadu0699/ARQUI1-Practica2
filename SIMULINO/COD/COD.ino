@@ -65,9 +65,11 @@ boolean ladoAB = true; // Arriba = true, Abajo = false;
 int conteoCamino = 0;
 
 /*------VARIABLES------*/
-boolean camino = false;
-int giros = 0;
 boolean encontrar = true;
+boolean camino = false;
+boolean desvio = false;
+int direccionDesvio = 0; // derecha 0, izquierda 1
+int giros = 0;
 int velocidad = 100;
 int Motor1 = 50;  //IZQ
 int Motor2 = 52; //DER
@@ -144,7 +146,7 @@ void loop() {
     Serial.println(t);*/
   if (d > 0) {
 
-    while (t > 60) {
+    while (t > 200) {
       detener();
       digitalWrite(OS1, HIGH);
       delayMicroseconds(10);
@@ -160,7 +162,7 @@ void loop() {
         Serial.println(auxT);
         Serial.println("Tiempo");
         Serial.println(t);*/
-      avanzar(15);
+      avanzar(20);
       if (contar > 1) {
         obstaculo = false;
         break;
@@ -171,17 +173,16 @@ void loop() {
       esquivar();
     }
   } else {
-    avanzar(15);
-  }
-}
+    while (t == 0) {
+      if (encontrar) {
+        digitalWrite(OS1, HIGH);
+        delayMicroseconds(10);
+        digitalWrite(OS1, LOW);
+        t = pulseIn(OS2, HIGH);
+      }
 
-void evaluar() {
-  ps1 = digitalRead(PS1P);
-  ps2 = digitalRead(PS2P);
-  ps3 = digitalRead(PS3P);
-  if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
-    detener();
-    //Serial.println("DETENTE");
+      avanzar(20);
+    }
   }
 }
 
@@ -210,6 +211,7 @@ void avanzar(int cuanto) {
 
   } else if (ps1 == HIGH && ps2 == HIGH && ps3 == LOW) {
     camino = true;
+    desvio = false;
     stepperDCHO.step(1);
     izquierda(cuanto + 5);
 
@@ -218,12 +220,16 @@ void avanzar(int cuanto) {
     adelante();
 
   } else if (ps1 == HIGH && ps2 == LOW && ps3 == LOW) {
+    desvio = true;
     camino = true;
+    direccionDesvio = 1;
     izquierda(cuanto);
+
     adelante();
 
   } else if (ps1 == LOW && ps2 == HIGH && ps3 == HIGH) {
     camino = true;
+    desvio = false;
     stepperIZQ.step(1);
     derecha(cuanto + 5);
 
@@ -232,11 +238,45 @@ void avanzar(int cuanto) {
     adelante();
 
   } else if (ps1 == LOW && ps2 == LOW && ps3 == HIGH) {
+    desvio = true;
     camino = true;
+    direccionDesvio = 0;
+
     derecha(cuanto);
     adelante();
 
   } else if (ps1 == LOW && ps2 == LOW && ps3 == LOW) {
+    if (desvio) {
+      desvio = false;
+      detener();
+      if (direccionDesvio == 1) {
+        while (!digitalRead(PS1P)) {
+          atras();
+        }
+        atras();
+        delay(300);
+        izquierda(160);
+      } else {
+        while (!digitalRead(PS3P)) {
+          atras();
+        }
+        atras();
+        delay(300);
+        derecha(160);
+      }
+      adelante();
+      delay(400);
+      ps1 = digitalRead(PS1P);
+      ps2 = digitalRead(PS2P);
+      ps3 = digitalRead(PS3P);
+
+      if (ps1 == HIGH || ps2 == HIGH || ps3 == HIGH) {
+        camino = false;
+      }
+
+
+
+    } 
     if (camino) {
       camino = false;
       stepperIZQ.step(-1);
@@ -290,8 +330,11 @@ void avanzar(int cuanto) {
           encontrar = false;
           stepperIZQ.step(-1);
           stepperDCHO.step(-1);
+          while (!digitalRead(PS1P) && !digitalRead(PS2P) && !digitalRead(PS3P) ) {
+            atras();
+          }
           atras();
-          delay(500);
+          delay(150);
 
           giros = 1;
 
@@ -330,9 +373,6 @@ void avanzar(int cuanto) {
         }
         ziczacVH = !ziczacVH;
       }
-      stepperIZQ.step(1);
-      stepperDCHO.step(1);
-      adelante();
     }
   }
   recorridoMatriz();
@@ -341,7 +381,7 @@ void avanzar(int cuanto) {
 /*--------------------------  M E T O D O S    DE    M O V I M I E N T O  --------------------------*/
 
 void esquivar() {
-  Serial.println("\nE S Q U I V A N D O   O B J E T O");
+  Serial.println("\nE S Q U I V A N D O   O B S T A C U LO");
   derecha(2100);
   detener();
 
@@ -388,7 +428,7 @@ void esquivar() {
   stepperDCHO.step(1);
   delay(100);
   adelante();
-  delay(3500);
+  delay(3800);
 
   izquierda(2100);
   detener();
@@ -411,8 +451,12 @@ void esquivar() {
   stepperIZQ.step(1);
   stepperDCHO.step(1);
   delay(100);
+
+  while (!digitalRead(PS1P) && !digitalRead(PS2P) && !digitalRead(PS3P) ) {
+    adelante();
+  }
   adelante();
-  delay(2000);
+  delay(150);
 
   derecha(2100);
   detener();
@@ -421,7 +465,7 @@ void esquivar() {
   stepperIZQ.step(1);
   delay(100);
   detener();
-  Serial.println("L I S T O!");
+  Serial.println("E S Q U I V A D I T O!");
   Serial.println("\n");
 }
 
@@ -436,7 +480,7 @@ void adelante() {
   digitalWrite(RWB, LOW);
 
   conteoCamino++;
-  if (conteoCamino == 8) {
+  if (conteoCamino == 4) {
     if (ziczacVH) {
       if (ladoAB) {
         posY--;
@@ -519,8 +563,8 @@ void encender(int posAX, int posAY, boolean barrer) {
     ledControl.clearDisplay(0);
     delay(100);
 
-    Serial.println("\nMATRIZ REINICIADITA!");
-    Serial.println("- - - - -\n");
+    /*Serial.println("\nMATRIZ REINICIADITA!");
+    Serial.println("- - - - -\n");*/
   }
 
   String cadena = matriz[posY];
@@ -557,8 +601,8 @@ void recorridoMatriz() {
       }
     }
   }
-  delay(100);
 
+  delay(75);
   for (int i = 0; i < 8; i++) {
     for (int j = 0; j < 8; j++) {
       if (matriz2[i].charAt(j) == '1') {
@@ -568,7 +612,7 @@ void recorridoMatriz() {
       }
     }
   }
-  delay(100);
+  delay(75);
 }
 
 
@@ -599,6 +643,6 @@ void barredora3vueltas() {
   }
   encender(posX, posY, true);
 
-  Serial.println("L I S T O!");
+  Serial.println("L I M P I E C I T O!");
   Serial.println("\n");
 }
